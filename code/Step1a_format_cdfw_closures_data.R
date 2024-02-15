@@ -16,7 +16,8 @@ outdir <- "data/processed"
 plotdir <- "figures"
 
 # CA base url
-googlesheets4::gs4_auth_configure(api_key = "")
+# API concsole: https://console.cloud.google.com/apis/dashboard?project=science-1559925307573
+googlesheets4::gs4_auth_configure(api_key = "AIzaSyAkSi-9GYG-K3XBNqKPSdoZzmtdDL-MMz8")
 base_url <- "https://docs.google.com/spreadsheets/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit#gid=0"
 
 # Read data

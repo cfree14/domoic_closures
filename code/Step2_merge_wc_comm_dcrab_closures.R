@@ -35,8 +35,11 @@ data_wa_orig <- readRDS(file=file.path(outdir, "PSMFC_2005_2023_comm_dcrab_closu
 data_ca <- data_ca_orig %>%
   # Reduce to CA
   filter(lat_dd <= 42 & date>= "2015-01-01") %>%
+  # Fix last season status
   mutate(status=as.character(status),
-         status=recode(status,
+        status=ifelse(date>"2023-07-15" | (date>"2023-06-30" & lat_dd<=38.76875), "Out-of-season", status)) %>% 
+  # Recode status
+  mutate(status=recode(status,
                        "30-fathom depth constraint"="30-fathom depth restriction",
                        "40-fathom depth constraint"="40-fathom depth restriction")) %>%
   # Fix a mistake spotted by Christy
@@ -49,9 +52,11 @@ sort(unique(data_ca$status))
 data_or <- data_or_orig %>%
   # Reduce to OR
   filter(lat_dd>42.00000 & lat_dd<46.25000 & date>= "2015-01-01") %>%
+  # Fix last season status
+  mutate(status=as.character(status)) %>% 
+  mutate(status=ifelse(date>"2023-08-14","out-of-season", status)) %>% 
   # Recode status
-  mutate(status=as.character(status),
-         status=recode(status,
+  mutate(status=recode(status,
                        "body condition"="Body condition delay",
                        "body condition/domoic acid"="Body condition/domoic acid delay",
                        "domoic acid"="Domoic acid delay",
@@ -67,8 +72,9 @@ sort(unique(data_or$status))
 data_wa <- data_wa_orig %>%
   # Reduce to WA
   filter(lat_dd >= 46.25000 & date>= "2015-01-01") %>%
-  # Convert to character
-  mutate(status=as.character(status))
+  # Fix last season status
+  mutate(status=as.character(status)) %>% 
+  mutate(status=ifelse(date>"2023-09-15","Out-of-season", status))
 
 sort(unique(data_wa$status))
 
