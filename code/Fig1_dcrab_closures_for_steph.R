@@ -16,15 +16,29 @@ outdir <- "data/processed"
 plotdir <- "figures"
 
 # Read data
-data <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
+data_orig <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
 
 # Read zones
 zones_orig <- readxl::read_excel(file.path(datadir, "WC_dcrab_da_mgmt_zones.xlsx"))
 
 
-# Build zones data
+# Format data
 ################################################################################
 
+# Inspect status
+table(data_orig$status)
+
+# Format data
+data <- data_orig %>% 
+  # Make entanglement regs same
+  mutate(status=recode(status, 
+                       "Whale entanglement closure"="Entanglement-related restriction",
+                       "30-fathom depth restriction"="Entanglement-related restriction",
+                       "40-fathom depth restriction"="Entanglement-related restriction",
+                       "50% gear reduction"="Entanglement-related restriction"))
+
+# Format data
+table(data$status)
 
 
 # Build zones data
@@ -108,8 +122,8 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", 
-                             "navy", "dodgerblue3", "dodgerblue1", "lightblue"), 
+                    values=c("grey85", "white", "pink", "orange", "red3", "coral", 
+                             "dodgerblue3"), # "navy", "dodgerblue3", "dodgerblue1", "lightblue"
                     drop=F) +
   # Theme
   theme_bw() + my_theme
@@ -118,7 +132,8 @@ g
 # Export plot
 ggsave(g, filename=file.path(plotdir, "FigX_dcrab_closures_for_steph.png"),
        width=6.5, height=3.25, units="in", dpi=600)
-
+ggsave(g, filename=file.path(plotdir, "FigX_dcrab_closures_for_steph.pdf"),
+       width=6.5, height=3.25, units="in", dpi=600)
 
 
 
