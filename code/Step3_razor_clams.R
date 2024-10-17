@@ -100,7 +100,7 @@ closure_grid2 <- closure_grid %>%
   mutate(status=factor(status, levels=c("Open", "Annual conservation closure", "Domoic acid closure")))
 
 
-# Plot data
+# Plot data with events
 ################################################################################
 
 # Setup theme
@@ -190,5 +190,85 @@ g
 # Export
 ggsave(g, filename=file.path(plotdir, "2016_2024_or_razor_clam_closures.png"), 
        width=6.5, height=4.5, units="in", dpi=600)
+
+
+# Plot data without events
+################################################################################
+
+# Setup theme
+my_theme <-  theme(axis.text=element_text(size=8),
+                   axis.title=element_text(size=9),
+                   legend.text=element_text(size=8),
+                   legend.title=element_text(size=9),
+                   strip.text=element_text(size=8),
+                   plot.title=element_text(size=9),
+                   # Gridlines
+                   panel.grid.major = element_blank(), 
+                   panel.grid.minor = element_blank(),
+                   panel.background = element_blank(), 
+                   axis.line = element_line(colour = "black"),
+                   # Legend
+                   legend.position = "top",
+                   legend.key.size = unit(0.3, "cm"),
+                   legend.key = element_rect(fill = NA, color=NA),
+                   legend.background = element_rect(fill=alpha('blue', 0))) 
+
+# Plot closure grid
+g <- ggplot(closure_grid2, aes(x=date, y=lat_dd, fill=status)) +
+  # Plot raster
+  geom_raster() +
+  # Axis
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  scale_y_continuous(breaks=42:46,
+                     sec.axis = sec_axis(
+                       transform = ~ .,
+                       name = "", 
+                       breaks = landmarks$latitude,
+                       labels = landmarks$landmark
+                     )) +
+  # Labels
+  labs(x="", y="Latitude (°N)") +
+  # Legends
+  scale_fill_manual(name="Season status", values=c("white", "grey80", "coral"), drop=F) +
+  guides(fill = guide_legend( title.position = "top", title.hjust = 0.5)) +
+  # Theme
+  theme_bw() + my_theme
+g
+
+# Export
+ggsave(g, filename=file.path(plotdir, "2010_2024_or_razor_clam_closures_clean.png"), 
+       width=6.5, height=4.5, units="in", dpi=600)
+
+# Zoom in on 2016 forwards
+
+# Plot closure grid
+g <- ggplot(closure_grid2 %>% filter(date>=lubridate::ymd("2016-01-01")), 
+            aes(x=date, y=lat_dd, fill=status)) +
+  # Plot raster
+  geom_raster() +
+  # Axis
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  scale_y_continuous(breaks=42:46,
+                     sec.axis = sec_axis(
+                       transform = ~ .,
+                       name = "", 
+                       breaks = landmarks$latitude,
+                       labels = landmarks$landmark
+                     )) +
+  # Labels
+  labs(x="", y="Latitude (°N)") +
+  # Legends
+  scale_fill_manual(name="Season status", values=c("white", "grey80", "coral"), drop=F) +
+  scale_linetype_discrete(name="Action type") +
+  guides(fill = guide_legend( title.position = "top", title.hjust = 0.5)) +
+  # Theme
+  theme_bw() + my_theme
+g
+
+# Export
+ggsave(g, filename=file.path(plotdir, "2016_2024_or_razor_clam_closures_clean.png"), 
+       width=6.5, height=4.5, units="in", dpi=600)
+
+
 
 
