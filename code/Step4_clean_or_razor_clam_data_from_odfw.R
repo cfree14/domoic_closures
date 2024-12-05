@@ -99,7 +99,7 @@ my_theme <-  theme(axis.text=element_text(size=8),
                    legend.background = element_rect(fill=alpha('blue', 0)))
 
 # Plot data
-ggplot(data, aes(xmin=date1, xmax=date2, ymin=lat_dd1, ymax=lat_dd2, fill=biotoxin, group=id)) +
+g <- ggplot(data, aes(xmin=date1, xmax=date2, ymin=lat_dd1, ymax=lat_dd2, fill=biotoxin, group=id)) +
   geom_rect() +
   # Labels
   labs(y="Latitude (°N)") +
@@ -108,13 +108,15 @@ ggplot(data, aes(xmin=date1, xmax=date2, ymin=lat_dd1, ymax=lat_dd2, fill=biotox
                breaks = seq(ymd("1970-01-01"), ymd("2030-01-01"), by = "5 years"),  
                date_labels = "%Y") + 
   # Legend
-  scale_fill_discrete(name="Closure type") +
+  scale_fill_manual(name="Closure type", values=c("orange", "darkred")) +
   # Theme
   theme_bw() + my_theme +
   theme(legend.position = "top")
+g
 
-
-
+# Export plot
+ggsave(g, filename=file.path(plotdir, "FigX_or_razor_clam_da_pst.png"), 
+       width=6.5, height=3, units="in", dpi=600)
 
 
 
