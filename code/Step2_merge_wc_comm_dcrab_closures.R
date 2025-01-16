@@ -22,7 +22,7 @@ season_key_orig <- readxl::read_excel(file.path(indir, "season_key.xlsx"))
 data_ca_orig <- readRDS(file=file.path(outdir, "CDFW_2015_2023_comm_dcrab_closures.Rds"))
 
 # Read OR data
-data_or_orig <- readRDS(file=file.path(outdir, "ODFW_2011_2023_comm_dcrab_closures.Rds"))
+data_or_orig <- readRDS(file=file.path(outdir, "ODFW_2011_2024_comm_dcrab_closures.Rds"))
 
 # Read WA data
 data_wa_orig <- readRDS(file=file.path(outdir, "PSMFC_2005_2023_comm_dcrab_closures.Rds"))
@@ -37,7 +37,7 @@ data_ca <- data_ca_orig %>%
   filter(lat_dd <= 42 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status),
-        status=ifelse(date>"2023-07-15" | (date>"2023-06-30" & lat_dd<=38.76875), "Out-of-season", status)) %>% 
+        status=ifelse(date>"2024-07-15" | (date>"2024-06-30" & lat_dd<=38.76875), "Out-of-season", status)) %>% 
   # Recode status
   mutate(status=recode(status,
                        "30-fathom depth constraint"="30-fathom depth restriction",
@@ -54,7 +54,7 @@ data_or <- data_or_orig %>%
   filter(lat_dd>42.00000 & lat_dd<46.25000 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status)) %>% 
-  mutate(status=ifelse(date>"2023-08-14","out-of-season", status)) %>% 
+  mutate(status=ifelse(date>"2024-08-14","out-of-season", status)) %>% 
   # Recode status
   mutate(status=recode(status,
                        "body condition"="Body condition delay",
@@ -74,7 +74,7 @@ data_wa <- data_wa_orig %>%
   filter(lat_dd >= 46.25000 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status)) %>% 
-  mutate(status=ifelse(date>"2023-09-15","Out-of-season", status))
+  mutate(status=ifelse(date>"2024-09-15","Out-of-season", status))
 
 sort(unique(data_wa$status))
 

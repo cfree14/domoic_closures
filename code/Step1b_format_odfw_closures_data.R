@@ -33,7 +33,11 @@ season_key_orig <- readxl::read_excel(file.path(indir, "season_key.xlsx"))
 data1 <- data_orig %>%
   # Column names
   janitor::clean_names("snake") %>%
-  rename(action=action_close_open, fishery=fishery_type, comm_name=species_parts, lat_s=s_latitude_n, lat_n=n_latitude_n,
+  rename(action=action_close_open, 
+         fishery=fishery_type, 
+         comm_name=species_parts, 
+         lat_s=s_latitude_n, 
+         lat_n=n_latitude_n,
          action_type=type_of_action) %>%
   # Format common name
   mutate(comm_name=recode(comm_name, "Dungeness Crab"="Dungeness crab", "Crabs"="Dungeness crab")) %>%
@@ -102,7 +106,7 @@ events <- data2 %>%
 
 # Step 4. Expand season grid to match date range
 range(data3$date)
-seasons <- 2010:2022
+seasons <- 2010:2023
 season_key_expanded <- purrr::map_df(seasons, function(x){
 
   # Build open/close date for season
@@ -284,6 +288,6 @@ or_dcrabs_comm <- build_closure_grid(data=data3, species="Dungeness crab", fishe
 plot_closures(or_dcrabs_comm)
 
 # Export
-saveRDS(or_dcrabs_comm, file=file.path(outdir, "ODFW_2011_2023_comm_dcrab_closures.Rds"))
+saveRDS(or_dcrabs_comm, file=file.path(outdir, "ODFW_2011_2024_comm_dcrab_closures.Rds"))
 
 

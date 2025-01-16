@@ -18,7 +18,7 @@ plotdir <- "figures"
 # CA base url
 # API concsole: https://console.cloud.google.com/apis/dashboard?project=science-1559925307573
 googlesheets4::gs4_auth_configure(api_key = "AIzaSyAkSi-9GYG-K3XBNqKPSdoZzmtdDL-MMz8")
-base_url <- "https://docs.google.com/spreadsheets/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit#gid=0"
+base_url <- "https://docs.google.com/spreadsheets/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit?gid=1969542539#gid=1969542539"
 
 # Read data
 data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="CDFW closures", na="NA")
@@ -29,14 +29,15 @@ data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="CDFW closures", na="N
 
 # Column names
 colnames(data_orig)
-cols <- c("year", "date", "species_parts", "fishery", "action", "reason", "type", "where", "lat_s", "lat_n", "link", "notes")
+cols <- c("year", "release_date", "date", "species_parts", "fishery", "action", "reason", "type", "where", "lat_s", "lat_n", "link", "notes")
 
 # Step 1. Basic formatting
 data1 <- data_orig %>%
   # Rename columns
   setNames(cols) %>%
   # Format date
-  mutate(date=ymd(date)) %>%
+  mutate(date=ymd(date),
+         release_date=ymd(release_date)) %>%
   # Break apart species and parts
   mutate(comm_name=gsub(" \\(.*", "", species_parts),
          parts=gsub(".*\\((.*)\\).*", "\\1", species_parts),
@@ -99,7 +100,7 @@ events <- data2 %>%
 ################################################################################
 
 # Dungeness commercial season key
-years <- 2014:2022
+years <- 2014:2023
 seasons <- paste(years, years+1-2000, sep="-")
 open_n <- paste0(years, "-12-01") %>% ymd()
 close_n <-  paste0(years+1, "-07-15") %>% ymd()
@@ -120,7 +121,7 @@ dcrab_comm_c <- tibble(comm_name="Dungeness crab",
 dcrab_comm <- bind_rows(dcrab_comm_n, dcrab_comm_c)
 
 # Dungeness recreational season key
-years <- 2014:2022
+years <- 2014:2023
 seasons <- paste(years, years+1-2000, sep="-")
 open <- freeR::first_wday_in_month(day="Saturday", month="November", years=years)
 close_n <-  paste0(years+1, "-07-30") %>% ymd()
@@ -156,7 +157,7 @@ build_closure_grid <- function(data, species, fishery, season_key){
 
   # Build empty grid
   date1 <- ymd("2015-01-01")
-  date2 <- ymd("2023-07-31")
+  date2 <- ymd("2024-07-31")
   dates <- seq(date1, date2, by="1 day")
   lat1 <- 32.5
   lat2 <- 42
@@ -219,17 +220,21 @@ build_closure_grid <- function(data, species, fishery, season_key){
                                 "out-of-season"="Out-of-season",
                                 "Body condition"="Body condition delay",
                                 "Domoic acid"="Domoic acid delay",
+                                "Whale entanglement/domoic acid"="Whale/domoic acid closure",
                                 "Whale entanglement"="Whale entanglement closure",
                                 "30-fathom depth constraint"="30-fathom depth constraint",
                                 "40-fathom depth constraint"="40-fathom depth constraint",
+                                "25% gear reduction"="25% gear reduction",
                                 "50% gear reduction"="50% gear reduction")) %>%
     mutate(status=factor(status, levels=c("Season open",
                                           "Out-of-season",
                                           "Body condition delay",
                                           "Domoic acid delay",
+                                          "Whale/domoic acid closure",
                                           "Whale entanglement closure",
                                           "30-fathom depth constraint",
                                           "40-fathom depth constraint",
+                                          "25% gear reduction",
                                           "50% gear reduction")))
 
   # Plot closure grid
@@ -279,8 +284,8 @@ plot_closures <- function(data){
     # Labels
     labs(x="", y="Latitude (°N)", title=title) +
     # Legends
-    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "darkred", 
-                                                     "navy", "dodgerblue3", "dodgerblue", "lightblue"), drop=F) +
+    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "darkred", "purple3",
+                                                     "navy", "dodgerblue3", "dodgerblue2", "dodgerblue", "lightblue"), drop=F) +
     # Theme
     theme_bw() + my_theme
   print(g)

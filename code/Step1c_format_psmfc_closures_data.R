@@ -99,7 +99,7 @@ events <- data2 %>%
 
 # Step 4. Expand season grid to match date range
 range(data3$date, na.rm=T)
-seasons <- 2004:2022
+seasons <- 2004:2023
 season_key_expanded <- purrr::map_df(seasons, function(x){
 
   # Build open/close date for season
@@ -273,10 +273,10 @@ plot_closures <- function(data){
   print(g)
 
   # Export plot
-  outfig <- paste0(tolower(species) %>% gsub(" ", "_", .), "_",
-                   tolower(fishery), "_closures.png")
-  ggsave(g, filename=file.path(plotdir, outfig),
-         width=6.5, height=3, units="in", dpi=600)
+  # outfig <- paste0(tolower(species) %>% gsub(" ", "_", .), "_",
+  #                  tolower(fishery), "_closures.png")
+  # ggsave(g, filename=file.path(plotdir, outfig),
+  #        width=6.5, height=3, units="in", dpi=600)
 
 }
 
