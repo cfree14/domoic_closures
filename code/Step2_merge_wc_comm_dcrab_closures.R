@@ -49,6 +49,7 @@ data_ca <- data_ca_orig %>%
 sort(unique(data_ca$status))
 
 # Format OR data
+table(data_or_orig$status)
 data_or <- data_or_orig %>%
   # Reduce to OR
   filter(lat_dd>42.00000 & lat_dd<46.25000 & date>= "2015-01-01") %>%
@@ -63,7 +64,9 @@ data_or <- data_or_orig %>%
                        "open"="Season open",
                        "out-of-season"="Out-of-season",
                        "evisceration order"="Evisceration order",
-                       "evisceration order-OR vessels in WA waters"="Evisceration order"))
+                       "evisceration order-OR vessels in WA waters"="Evisceration order",
+                       "evisceration order (+depth restriction/gear reduction)"="Evisceration order (+depth restriction/gear reduction)",
+                       "40-fathom depth restriction/20% gear reduction"="40-fathom depth restriction/20% gear reduction"))
 
 sort(unique(data_or$status))
 
@@ -89,9 +92,12 @@ data <- bind_rows(data_ca, data_or, data_wa) %>%
                                 "Body condition/domoic acid delay", # darkorange
                                 "Domoic acid delay", # darkred,
                                 "Evisceration order",
+                                "Evisceration order (+depth restriction/gear reduction)",
                                 "Whale entanglement closure",
                                 "30-fathom depth restriction",
                                 "40-fathom depth restriction",
+                                "40-fathom depth restriction/20% gear reduction",
+                                "33% gear reduction",
                                 "50% gear reduction")))
 
 # Export
@@ -109,8 +115,8 @@ ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey80", "white", "coral", "darkorange", "darkred", "pink", 
-                             "navy", "dodgerblue3", "dodgerblue", "lightblue"), 
+                    values=c("grey80", "white", "coral", "darkorange", "darkred", "pink", "purple4", 
+                             "navy", "dodgerblue3", "dodgerblue2", "dodgerblue1", "dodgerblue", "lightblue"), 
                     drop=F) +
   # Theme
   theme_bw()

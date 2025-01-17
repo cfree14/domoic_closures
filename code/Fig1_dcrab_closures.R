@@ -15,7 +15,18 @@ outdir <- "data/processed"
 plotdir <- "figures"
 
 # Read data
-data <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
+data_orig <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
+
+# Format data
+levels(data_orig$status)
+levels_use <- c( "Season open", "Out-of-season", "Body condition delay", 
+                 "Body condition/domoic acid delay", "Domoic acid delay", "Evisceration order",                                
+                 "Evisceration order (+depth/gear restriction)", "Whale entanglement closure",                            
+                 "30-fa depth restriction", "40-fa depth restriction",                           
+                 "40-fa depth restriction/20% gear reduction", "33% gear reduction", "50% gear reduction" )
+
+data1 <- data_orig %>%
+  mutate(status = factor(status, labels = levels_use))
 
 
 # Plot data
@@ -23,7 +34,7 @@ data <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
 
 # Sonoma-Mendocino county line
 son_mend_county <- 38+46.125/60
-date_min_do <- min(data$date)
+date_min_do <- min(data_orig$date)
 
 # Theme
 my_theme <-  theme(axis.text=element_text(size=7),
@@ -42,7 +53,7 @@ my_theme <-  theme(axis.text=element_text(size=7),
                    legend.background = element_rect(fill=alpha('blue', 0)))
 
 # Plot data
-g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
+g <- ggplot(data1, aes(x=date, y=lat_dd, fill=status)) +
   # Plot raster
   geom_raster() +
   # State/region lines
@@ -60,8 +71,8 @@ g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", 
-                             "navy", "dodgerblue3", "dodgerblue1", "lightblue"), 
+                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
+                             "navy", "dodgerblue3", "dodgerblue1", "dodgerblue", "lightblue", "lightblue1"), 
                     drop=F) +
   # Theme
   theme_bw() + my_theme
@@ -72,6 +83,55 @@ ggsave(g, filename=file.path(plotdir, "FigX_dcrab_closures.png"),
        width=6.5, height=3.25, units="in", dpi=600)
 
 
+# Plot data
+################################################################################
 
+# Recode
+data2 <- data_orig %>% 
+  mutate(status=as.character(status) %>% as.vector(),
+         status=recode_factor(status, 
+                              "Season open"="Season open", 
+                              "Out-of-season"="Out-of-season", 
+                              "Body condition delay"="Body condition delay", 
+                              "Body condition/domoic acid delay"="Body condition/domoic acid delay", 
+                              "Domoic acid delay"="Domoic acid delay", 
+                              "Evisceration order"="Evisceration order",                               
+                              "Evisceration order (+depth restriction/gear reduction)"="Evisceration order (+depth/gear restriction)", 
+                              "Whale entanglement closure"="Whale entanglement closure",                            
+                              "30-fathom depth restriction"="Depth restriction", 
+                              "40-fathom depth restriction"="Depth restriction",                           
+                              "40-fathom depth restriction/20% gear reduction"="Depth restriction/gear reduction",
+                              "33% gear reduction"="Gear reduction",
+                              "50% gear reduction"="Gear reduction"))
+str(data2$status)
 
+# Plot data
+g2 <- ggplot(data2, aes(x=date, y=lat_dd, fill=status)) +
+  # Plot raster
+  geom_raster() +
+  # State/region lines
+  geom_hline(yintercept=c(48.43333, 46.25000, 42.00000), linewidth=0.2) +
+  geom_hline(yintercept = son_mend_county, linetype="dashed", linewidth=0.2) + # Sonoma/Mendocino
+  # Label state lines
+  annotate(geom="text", x=date_min_do, y=48.48, hjust=0, vjust=1.5, label="Washington", color="black", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=46.25, hjust=0, vjust=1.5, label="Oregon", color="black", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=42, hjust=0, vjust=1.5, label="N. California", color="black", size=2.5) +
+  annotate(geom="text", x=date_min_do, y=son_mend_county, hjust=0, vjust=1.5, label="C. California", color="black", size=2.5) +
+  # Axis
+  scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  scale_y_continuous(breaks=35:48, lim=c(35,NA)) +
+  # Labels
+  labs(x="Date", y="Latitude (°N)") +
+  # Legends
+  scale_fill_manual(name="Season status", 
+                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
+                             "navy", "dodgerblue3", "dodgerblue", "lightblue1"), 
+                    drop=F) +
+  # Theme
+  theme_bw() + my_theme
+g2
+
+# Export plot
+ggsave(g2, filename=file.path(plotdir, "FigX_dcrab_closures_simple.png"),
+       width=6.5, height=3.25, units="in", dpi=600)
 

@@ -44,7 +44,7 @@ data1 <- data_orig %>%
   mutate(date=ymd(date),
          release_date=ymd(release_date)) %>%
   # Format reason
-  mutate(reason=ifelse(grepl("evisceration", action_type), action_type, reason),
+  mutate(reason=ifelse(grepl("evisceration|33", action_type), action_type, reason),
          reason=recode(reason, "body condition/biotoxin"="body condition/domoic acid"))
 
 # Inspect data
@@ -209,29 +209,30 @@ build_closure_grid <- function(data, species, fishery, season_key){
                                 "body condition/domoic acid"="Body condition/domoic acid delay",
                                 "domoic acid"="Domoic acid delay",
                                 "evisceration order"="Evisceration order",
-                                "oil spill"="Oil spill"))
+                                "oil spill"="Oil spill",
+                                "33% gear reduction"="33% gear reduction"))
                                 # "head-start"="Head-start",
                                 # "SMA"="SMA",
                                 # "Summer extension"="summer extension"))
 
   # Plot closure grid
-  title <- paste(species, tolower(fishery_do), "fishery")
-  g <- ggplot(closure_grid, aes(x=date, y=lat_dd, fill=status)) +
-    # Plot raster
-    geom_raster() +
-    # Plot events
-    geom_segment(data=sdata, mapping=aes(x=date, xend=date, y=lat_s, yend=lat_n, linetype=action, ), inherit.aes = F) +
-    # Axis
-    scale_x_date(date_breaks="1 year", date_labels = "%Y") +
-    scale_y_continuous(breaks=35:48) +
-    # Labels
-    labs(x="", y="Latitude (°N)", title=title) +
-    # Legends
-    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy"), drop=F) +
-    # scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy", "lightblue", "purple", "yellow"), drop=F) +
-    # Theme
-    theme_bw()
-  print(g)
+  # title <- paste(species, tolower(fishery_do), "fishery")
+  # g <- ggplot(closure_grid, aes(x=date, y=lat_dd, fill=status)) +
+  #   # Plot raster
+  #   geom_raster() +
+  #   # Plot events
+  #   geom_segment(data=sdata, mapping=aes(x=date, xend=date, y=lat_s, yend=lat_n, linetype=action, ), inherit.aes = F) +
+  #   # Axis
+  #   scale_x_date(date_breaks="1 year", date_labels = "%Y") +
+  #   scale_y_continuous(breaks=35:48) +
+  #   # Labels
+  #   labs(x="", y="Latitude (°N)", title=title) +
+  #   # Legends
+  #   scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy", "purple3"), drop=F) +
+  #   # scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy", "lightblue", "purple", "yellow"), drop=F) +
+  #   # Theme
+  #   theme_bw()
+  # print(g)
 
   # Return
   return(closure_grid)
@@ -240,7 +241,7 @@ build_closure_grid <- function(data, species, fishery, season_key){
 
 
 # Plot indidivually
-data <- wa_dcrabs_comm
+#data <- wa_dcrabs_comm
 plot_closures <- function(data){
 
   # Species fishery
@@ -267,7 +268,7 @@ plot_closures <- function(data){
     # Labels
     labs(x="", y="Latitude (°N)", title=title) +
     # Legends
-    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy"), drop=F) +
+    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "orange", "darkred", "coral", "navy", "purple4"), drop=F) +
     # Theme
     theme_bw() + my_theme
   print(g)

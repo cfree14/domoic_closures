@@ -48,7 +48,7 @@ data1 <- data_orig %>%
   mutate(date=ymd(date),
          release_date=ymd(release_date)) %>%
   # Format reason
-  mutate(reason=ifelse(grepl("evisceration", action_type), action_type, reason)) %>%
+  mutate(reason=ifelse(grepl("evisceration|gear reduction", action_type), action_type, reason)) %>%
   # Format areas
   mutate(area=ifelse(is.na(area), "not specified", area), # Camila didn't specify?
          area=recode(area,
@@ -244,6 +244,7 @@ plot_closures <- function(data){
                     plot.title=element_text(size=10))
   
   # Format data
+  table(data$status)
   data_plot <- data %>% 
     filter(lat_dd>42.00000 & lat_dd<=46.25000) %>% 
     mutate(status=factor(status, 
@@ -253,7 +254,8 @@ plot_closures <- function(data){
                                   "body condition/domoic acid", 
                                   "domoic acid",
                                   "evisceration order",
-                                  "whale entanglement")))
+                                  "evisceration order (+depth restriction/gear reduction)",
+                                  "40-fathom depth restriction/20% gear reduction")))
     
   # Plot data
   title <- paste(species, tolower(fishery), "fishery")
@@ -266,7 +268,7 @@ plot_closures <- function(data){
     # Labels
     labs(x="", y="Latitude (°N)", title=title) +
     # Legends
-    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "coral", "orange", "darkred", "navy"), drop=F) +
+    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "coral", "orange", "darkred", "purple3", "dodgerblue"), drop=F) +
     # Theme
     theme_bw() + my_theme
   print(g)
