@@ -16,7 +16,7 @@ outdir <- "data/processed"
 plotdir <- "figures"
 
 # OR-WA base url
-googlesheets4::gs4_auth_configure(api_key = "")
+googlesheets4::gs4_auth_configure(api_key = "AIzaSyAkSi-9GYG-K3XBNqKPSdoZzmtdDL-MMz8")
 base_url <- "https://docs.google.com/spreadsheets/d/1wz18kDz6u19GbGoZrW_q8Dz-kZq16IKF33DZb5Sd4-w/edit#gid=0"
 
 # Read data
