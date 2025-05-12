@@ -1,0 +1,12 @@
+name: dcrab_season_status
+title: dcrab_season_status
+username: emlab-ucsb
+account: emlab-ucsb
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14739774
+bundleId: 10272038
+url: https://emlab-ucsb.shinyapps.io/dcrab_season_status/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
