@@ -5,7 +5,7 @@ account: emlab-ucsb
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14739774
-bundleId: 10351349
+bundleId: 10898770
 url: https://emlab-ucsb.shinyapps.io/dcrab_season_status/
 version: 1
 asMultiple: FALSE

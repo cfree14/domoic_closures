@@ -113,7 +113,55 @@ ui <- fluidPage(
     
     # Main panel
     mainPanel(width = 9,
-      plotOutput("statusPlot", height = "500px", width="1100px")
+              
+      # Figure
+      plotOutput("statusPlot", height = "500px", width="1100px"),
+      
+      # Season 
+      h3("Management actions"), 
+      p("The figure above illustrates the following management actions during the season"),
+      
+      tags$ul(
+        tags$li(tags$b("Season open:"), 
+                "The season is open without restrictions."),
+        tags$li(tags$b("Out-of-season:"), 
+                "Outside the Dungeness crab season, which goes from Nov 15-Jun 30 in Central California, Dec 1-Jul 15 in Northern California, Dec 1-Aug 14 in Oregon, and Dec 1-Sep 15 in Washington."),
+        tags$li(tags$b("Body condition delay:"), 
+                "The season is delayed because body condition (meat quality) does not meet market standards. These are also known as meat quality delays."),
+        tags$li(tags$b("Body condition/domoic acid delay:"), 
+                "The season is delayed due to both poor body condition (meat quality) and high domoic acid toxicity."),
+        tags$li(tags$b("Domoic acid delay:"), 
+                "The season is delayed or the area is closed due to high domoic acid toxicity."),
+        tags$li(tags$b("Evisceration order:"), 
+                "The fishery is allowed to operate in this area with a requirement that the toxic viscera are removed."),
+        tags$li(tags$b("Evisceration order (+depth/gear restrictions):"), 
+                "The fishery is allowed to operate in this area with a requirement that the toxic viscera are removed. In addition, some depth or gear restrictions are in place."),
+        tags$li(tags$b("Whale entanglement closure:"), 
+                "The fishery is closed to avoid marine life entanglements (generally whales)."),
+        tags$li(tags$b("30-fa depth restriction:"), 
+                "The fishery can only operate in waters shallower than 30-fathoms to avoid marine life entanglements (generally whales)."),
+        tags$li(tags$b("40-fa depth restriction:"), 
+                "The fishery can only operate in waters shallower than 40-fathoms to avoid marine life entanglements (generally whales)."),
+        tags$li(tags$b("40-fa depth restriction/20% gear reduction:"), 
+                "The fishery can only operate in waters shallower than 30-fathoms to avoid marine life entanglements (generally whales) and vessels can only use 20% of their traps."),
+        tags$li(tags$b("33% gear reduction:"), 
+                "Vessels can only use 33% of their traps to avoid marine life entanglements."),
+        tags$li(tags$b("50% gear reduction:"), 
+                "Vessels can only use 50% of their traps to avoid marine life entanglements.")
+      ),
+      
+      # Citation
+      h3("How to cite"), 
+      p(
+        "Free CM, Moore SK, Trainer VL (2022) ",
+        a("The value of monitoring in efficiently and adaptively managing biotoxin contamination in marine fisheries.",
+          href = "https://www.sciencedirect.com/science/article/pii/S1568988322000543",
+          target = "_blank"
+        ),
+        em(" Harmful Algae"),
+        " 114: 102226."
+      )
+      
     )
   )
 
