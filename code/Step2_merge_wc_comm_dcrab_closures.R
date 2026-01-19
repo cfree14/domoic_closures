@@ -42,11 +42,14 @@ data_ca <- data_ca_orig %>%
   mutate(status=recode(status,
                        "30-fathom depth constraint"="30-fathom depth restriction",
                        "40-fathom depth constraint"="40-fathom depth restriction",
+                       "30-fathom depth constraint/25% gear reduction"="30-fathom depth restriction/25% gear reduction",
+                       "30-fathom depth constraint/50% gear reduction"="30-fathom depth restriction/50% gear reduction",
                        "Whale/domoic acid closure"="Whale entanglement/domoic acid delay")) %>%
   # Fix a mistake spotted by Christy
   mutate(status=ifelse(lat_dd>=(41+8/60) & date>="2018-12-01" & date < "2019-01-25", "Body condition/domoic acid delay", status))
          # status=ifelse(lat_dd>=(41+8/60) & date>="2019-01-15" & date <= "2019-01-25", "Domoic acid delay", status))
 
+sort(unique(data_ca$status))
 sort(unique(data_ca$status))
 
 # Format OR data
@@ -84,10 +87,21 @@ sort(unique(data_wa$status))
 
 
 # Merge data
-data <- bind_rows(data_ca, data_or, data_wa) 
+data <- bind_rows(data_ca, data_or, data_wa) %>% 
+  # Fix status craziness
+  mutate(status = as.character(status)) %>%
+  { attr(., "out.attrs") <- NULL; . }
+str(data)
 
 # Status
 sort(unique(data$status))
+
+
+# Export
+saveRDS(data, file=file.path(outdir, "2015_2024_WC_dcrab_closures.Rds"))
+
+
+
 
 # Order data
 data_ordered <- data %>%
@@ -107,15 +121,13 @@ data_ordered <- data %>%
                                 "25% gear reduction",
                                 "33% gear reduction",
                                 "50% gear reduction",
-                                "30-fathom depth constraint/25% gear reduction",        
-                                "30-fathom depth constraint/50% gear reduction",
+                                "30-fathom depth restriction/25% gear reduction",        
+                                "30-fathom depth restriction/50% gear reduction",
                                 "40-fathom depth restriction/20% gear reduction")))
 
 # Makre sure all status levels are complete
 freeR::complete(data_ordered)
-
-# Export
-saveRDS(data_ordered, file=file.path(outdir, "2015_2024_WC_dcrab_closures.Rds"))
+table(data_ordered$status)
 
 
 # Plot data

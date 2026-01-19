@@ -17,29 +17,47 @@ plotdir <- "figures"
 # Read data
 data_orig <- readRDS(data, file=file.path(outdir, "2015_2024_WC_dcrab_closures.Rds"))
 
-# Format data
-levels(data_orig$status)
-levels_use <- c( "Season open", 
-                 "Out-of-season", 
-                 "Body condition delay", 
-                 "Body condition/domoic acid delay", 
-                 "Domoic acid delay", 
-                 "Evisceration order",                                
-                 "Evisceration order (+depth/gear restriction)", 
-                 "Whale entanglement/domoic acid delay",
-                 "Whale entanglement closure",                            
-                 "30-fathom depth restriction", 
-                 "40-fathom depth restriction",                           
-                 "25% gear reduction", 
-                 "33% gear reduction", 
-                 "50% gear reduction",
-                 "30-fathom depth constraint/25% gear reduction",
-                 "30-fathom depth constraint/50% gear reduction",
-                 "40-fathom depth restriction/20% gear reduction")
 
-data1 <- data_orig %>%
-  mutate(status = factor(status, labels = levels_use))
+# Build data
+################################################################################
 
+# Levels
+sort(unique(data_orig$status))
+
+# Order levels (use ORIGINAL name)
+levels_use <- c("Season open",                                           
+                "Out-of-season",   
+                "Body condition delay",                                   
+                "Body condition/domoic acid delay", 
+                "Domoic acid delay",                                     
+                "Evisceration order",                                    
+                "Evisceration order (+depth restriction/gear reduction)", 
+                "Whale entanglement/domoic acid delay",
+                "Whale entanglement closure",
+                "30-fathom depth restriction",   
+                "40-fathom depth restriction", 
+                "25% gear reduction",  
+                "33% gear reduction",                                    
+                "50% gear reduction",
+                "40-fathom depth restriction/20% gear reduction",
+                "30-fathom depth restriction/25% gear reduction",         
+                "30-fathom depth restriction/50% gear reduction")
+
+# Reset order
+data <- data_orig %>%
+  # Ordeer
+  mutate(status = factor(status, levels = levels_use)) %>% 
+  # Update level name
+  mutate(status = fct_recode(
+    status,
+    "Evisceration order (+depth/gear restriction)" = "Evisceration order (+depth restriction/gear reduction)"
+  ))
+
+# Inspect
+str(data)
+#freeR::complete(data1)
+levels(data$status)
+table(data$status)
 
 # Plot data
 ################################################################################
@@ -65,7 +83,7 @@ my_theme <-  theme(axis.text=element_text(size=7),
                    legend.background = element_rect(fill=alpha('blue', 0)))
 
 # Plot data
-g <- ggplot(data1, aes(x=date, y=lat_dd, fill=status)) +
+g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   # Plot raster
   geom_raster() +
   # State/region lines
@@ -89,16 +107,16 @@ g <- ggplot(data1, aes(x=date, y=lat_dd, fill=status)) +
                              "orange", # Body condition/domoic acid delay
                              "darkred", # Domoic acid delay
                              "coral", # Evisceration order
-                             "purple2", # Evisceration order (+depth/gear restriction)
-                             "purple4", # Whale entanglement/domoic acid delay
+                             "violetred", # Evisceration order (+depth/gear restriction)
+                             "purple3", # Whale entanglement/domoic acid delay
                              "navy", # Whale entanglement closure
                              "dodgerblue3", # 30-fathom depth restriction
                              "dodgerblue1", # 40-fathom depth restriction
                              "lightblue1", # 25% gear reduction 
                              "lightblue2", # 33% gear reduction
                              "lightblue3", # 50% gear reduction
-                             "springgreen1",  # 30-fathom depth constraint/25% gear reduction
-                             "springgreen3",  # 30-fathom depth constraint/50% gear reduction
+                             "springgreen1",  # 30-fathom depth restriction/25% gear reduction
+                             "springgreen3",  # 30-fathom depth restriction/50% gear reduction
                              "springgreen4" # 40-fathom depth restriction/20% gear reduction
                              ),
                     drop=F) +
@@ -133,8 +151,8 @@ data2 <- data_orig %>%
                               "33% gear reduction" = "Gear reduction",
                               "50% gear reduction" = "Gear reduction",
                               "40-fathom depth restriction/20% gear reduction" = "Depth restriction/gear reduction",
-                              "30-fathom depth constraint/25% gear reduction" = "Depth restriction/gear reduction",
-                              "30-fathom depth constraint/50% gear reduction" = "Depth restriction/gear reduction"))
+                              "30-fathom depth restriction/25% gear reduction" = "Depth restriction/gear reduction",
+                              "30-fathom depth restriction/50% gear reduction" = "Depth restriction/gear reduction"))
 levels(data2$status)
 
 # Plot data
@@ -162,8 +180,8 @@ g2 <- ggplot(data2, aes(x=date, y=lat_dd, fill=status)) +
                              "orange", # Body condition/domoic acid delay
                              "darkred", # Domoic acid delay
                              "coral", # Evisceration order
-                             "purple2", # Evisceration order (+depth/gear restriction)
-                             "purple4", # Whale entanglement/domoic acid delay
+                             "violetred", # Evisceration order (+depth/gear restriction)
+                             "purple3", # Whale entanglement/domoic acid delay
                              "navy", # Whale entanglement closure 
                              "lightblue1", # Depth restriction
                              "dodgerblue", # Gear reduction
@@ -184,7 +202,7 @@ ggsave(g2, filename=file.path(plotdir, "FigX_dcrab_closures_simple.png"),
 date_min_do1 <- ymd("2020-09-20")
 
 # Plot data
-g <- ggplot(data1 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=status)) +
+g <- ggplot(data %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=status)) +
   # Plot raster
   geom_raster() +
   # State/region lines
@@ -208,8 +226,8 @@ g <- ggplot(data1 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=s
                              "orange", # Body condition/domoic acid delay
                              "darkred", # Domoic acid delay
                              "coral", # Evisceration order
-                             "purple2", # Evisceration order (+depth/gear restriction)
-                             "purple4", # Whale entanglement/domoic acid delay
+                             "violetred", # Evisceration order (+depth/gear restriction)
+                             "purple3", # Whale entanglement/domoic acid delay
                              "navy", # Whale entanglement closure
                              "dodgerblue3", # 30-fathom depth restriction
                              "dodgerblue1", # 40-fathom depth restriction
@@ -259,8 +277,8 @@ g2 <- ggplot(data2 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=
                              "orange", # Body condition/domoic acid delay
                              "darkred", # Domoic acid delay
                              "coral", # Evisceration order
-                             "purple2", # Evisceration order (+depth/gear restriction)
-                             "purple4", # Whale entanglement/domoic acid delay
+                             "violetred", # Evisceration order (+depth/gear restriction)
+                             "purple3", # Whale entanglement/domoic acid delay
                              "navy", # Whale entanglement closure 
                              "lightblue1", # Depth restriction
                              "dodgerblue", # Gear reduction
