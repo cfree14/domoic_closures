@@ -15,15 +15,27 @@ outdir <- "data/processed"
 plotdir <- "figures"
 
 # Read data
-data_orig <- readRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
+data_orig <- readRDS(data, file=file.path(outdir, "2015_2024_WC_dcrab_closures.Rds"))
 
 # Format data
 levels(data_orig$status)
-levels_use <- c( "Season open", "Out-of-season", "Body condition delay", 
-                 "Body condition/domoic acid delay", "Domoic acid delay", "Evisceration order",                                
-                 "Evisceration order (+depth/gear restriction)", "Whale entanglement closure",                            
-                 "30-fa depth restriction", "40-fa depth restriction",                           
-                 "40-fa depth restriction/20% gear reduction", "33% gear reduction", "50% gear reduction" )
+levels_use <- c( "Season open", 
+                 "Out-of-season", 
+                 "Body condition delay", 
+                 "Body condition/domoic acid delay", 
+                 "Domoic acid delay", 
+                 "Evisceration order",                                
+                 "Evisceration order (+depth/gear restriction)", 
+                 "Whale entanglement/domoic acid delay",
+                 "Whale entanglement closure",                            
+                 "30-fathom depth restriction", 
+                 "40-fathom depth restriction",                           
+                 "25% gear reduction", 
+                 "33% gear reduction", 
+                 "50% gear reduction",
+                 "30-fathom depth constraint/25% gear reduction",
+                 "30-fathom depth constraint/50% gear reduction",
+                 "40-fathom depth restriction/20% gear reduction")
 
 data1 <- data_orig %>%
   mutate(status = factor(status, labels = levels_use))
@@ -71,8 +83,24 @@ g <- ggplot(data1, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
-                             "navy", "dodgerblue3", "dodgerblue1", "dodgerblue", "lightblue", "lightblue1"), 
+                    values=c("grey85", # Season open
+                             "white", # Out-of-season
+                             "pink", # Body condition delay
+                             "orange", # Body condition/domoic acid delay
+                             "darkred", # Domoic acid delay
+                             "coral", # Evisceration order
+                             "purple2", # Evisceration order (+depth/gear restriction)
+                             "purple4", # Whale entanglement/domoic acid delay
+                             "navy", # Whale entanglement closure
+                             "dodgerblue3", # 30-fathom depth restriction
+                             "dodgerblue1", # 40-fathom depth restriction
+                             "lightblue1", # 25% gear reduction 
+                             "lightblue2", # 33% gear reduction
+                             "lightblue3", # 50% gear reduction
+                             "springgreen1",  # 30-fathom depth constraint/25% gear reduction
+                             "springgreen3",  # 30-fathom depth constraint/50% gear reduction
+                             "springgreen4" # 40-fathom depth restriction/20% gear reduction
+                             ),
                     drop=F) +
   # Theme
   theme_bw() + my_theme
@@ -97,13 +125,17 @@ data2 <- data_orig %>%
                               "Domoic acid delay"="Domoic acid delay", 
                               "Evisceration order"="Evisceration order",                               
                               "Evisceration order (+depth restriction/gear reduction)"="Evisceration order (+depth/gear restriction)", 
-                              "Whale entanglement closure"="Whale entanglement closure",                            
-                              "30-fathom depth restriction"="Depth restriction", 
-                              "40-fathom depth restriction"="Depth restriction",                           
-                              "40-fathom depth restriction/20% gear reduction"="Depth restriction/gear reduction",
-                              "33% gear reduction"="Gear reduction",
-                              "50% gear reduction"="Gear reduction"))
-str(data2$status)
+                              "Whale entanglement/domoic acid delay" = "Whale entanglement/domoic acid delay",
+                              "Whale entanglement closure" = "Whale entanglement closure",                            
+                              "30-fathom depth restriction" = "Depth restriction", 
+                              "40-fathom depth restriction" = "Depth restriction",                           
+                              "25% gear reduction" = "Gear reduction", 
+                              "33% gear reduction" = "Gear reduction",
+                              "50% gear reduction" = "Gear reduction",
+                              "40-fathom depth restriction/20% gear reduction" = "Depth restriction/gear reduction",
+                              "30-fathom depth constraint/25% gear reduction" = "Depth restriction/gear reduction",
+                              "30-fathom depth constraint/50% gear reduction" = "Depth restriction/gear reduction"))
+levels(data2$status)
 
 # Plot data
 g2 <- ggplot(data2, aes(x=date, y=lat_dd, fill=status)) +
@@ -124,8 +156,18 @@ g2 <- ggplot(data2, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
-                             "navy", "dodgerblue3", "dodgerblue", "lightblue1"), 
+                    values=c("grey85", # Season open
+                             "white", # Out-of-season
+                             "pink", # Body condition delay
+                             "orange", # Body condition/domoic acid delay
+                             "darkred", # Domoic acid delay
+                             "coral", # Evisceration order
+                             "purple2", # Evisceration order (+depth/gear restriction)
+                             "purple4", # Whale entanglement/domoic acid delay
+                             "navy", # Whale entanglement closure 
+                             "lightblue1", # Depth restriction
+                             "dodgerblue", # Gear reduction
+                             "dodgerblue3"), # Depth restriction/gear reduction
                     drop=F) +
   # Theme
   theme_bw() + my_theme
@@ -136,12 +178,10 @@ ggsave(g2, filename=file.path(plotdir, "FigX_dcrab_closures_simple.png"),
        width=6.5, height=3.25, units="in", dpi=600)
 
 
-
-
 # Plot data - last 5 years
 ################################################################################
 
-date_min_do1 <- ymd("2019-09-15")
+date_min_do1 <- ymd("2020-09-20")
 
 # Plot data
 g <- ggplot(data1 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=status)) +
@@ -162,8 +202,24 @@ g <- ggplot(data1 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=s
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
-                             "navy", "dodgerblue3", "dodgerblue1", "dodgerblue", "lightblue", "lightblue1"), 
+                    values=c("grey85", # Season open
+                             "white", # Out-of-season
+                             "pink", # Body condition delay
+                             "orange", # Body condition/domoic acid delay
+                             "darkred", # Domoic acid delay
+                             "coral", # Evisceration order
+                             "purple2", # Evisceration order (+depth/gear restriction)
+                             "purple4", # Whale entanglement/domoic acid delay
+                             "navy", # Whale entanglement closure
+                             "dodgerblue3", # 30-fathom depth restriction
+                             "dodgerblue1", # 40-fathom depth restriction
+                             "lightblue1", # 25% gear reduction 
+                             "lightblue2", # 33% gear reduction
+                             "lightblue3", # 50% gear reduction
+                             "springgreen1",  # 30-fathom depth constraint/25% gear reduction
+                             "springgreen3",  # 30-fathom depth constraint/50% gear reduction
+                             "springgreen4" # 40-fathom depth restriction/20% gear reduction
+                    ),
                     drop=F) +
   # Theme
   theme_bw() + my_theme
@@ -195,9 +251,20 @@ g2 <- ggplot(data2 %>% filter(date >= date_min_do1), aes(x=date, y=lat_dd, fill=
   # Labels
   labs(x="Date", y="Latitude (°N)") +
   # Legends
+  # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey85", "white", "pink", "orange", "darkred", "coral", "purple3",
-                             "navy", "dodgerblue3", "dodgerblue", "lightblue1"), 
+                    values=c("grey85", # Season open
+                             "white", # Out-of-season
+                             "pink", # Body condition delay
+                             "orange", # Body condition/domoic acid delay
+                             "darkred", # Domoic acid delay
+                             "coral", # Evisceration order
+                             "purple2", # Evisceration order (+depth/gear restriction)
+                             "purple4", # Whale entanglement/domoic acid delay
+                             "navy", # Whale entanglement closure 
+                             "lightblue1", # Depth restriction
+                             "dodgerblue", # Gear reduction
+                             "dodgerblue3"), # Depth restriction/gear reduction
                     drop=F) +
   # Theme
   theme_bw() + my_theme

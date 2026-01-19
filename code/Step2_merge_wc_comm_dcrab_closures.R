@@ -19,13 +19,13 @@ plotdir <- "figures"
 season_key_orig <- readxl::read_excel(file.path(indir, "season_key.xlsx"))
 
 # Read CA data
-data_ca_orig <- readRDS(file=file.path(outdir, "CDFW_2015_2023_comm_dcrab_closures.Rds"))
+data_ca_orig <- readRDS(file=file.path(outdir, "CDFW_2015_2024_comm_dcrab_closures.Rds"))
 
 # Read OR data
 data_or_orig <- readRDS(file=file.path(outdir, "ODFW_2011_2024_comm_dcrab_closures.Rds"))
 
 # Read WA data
-data_wa_orig <- readRDS(file=file.path(outdir, "PSMFC_2005_2023_comm_dcrab_closures.Rds"))
+data_wa_orig <- readRDS(file=file.path(outdir, "PSMFC_2005_2024_comm_dcrab_closures.Rds"))
 
 
 # Format and merge
@@ -37,11 +37,12 @@ data_ca <- data_ca_orig %>%
   filter(lat_dd <= 42 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status),
-        status=ifelse(date>"2024-07-15" | (date>"2024-06-30" & lat_dd<=38.76875), "Out-of-season", status)) %>% 
+        status=ifelse(date>"2025-07-15" | (date>"2025-06-30" & lat_dd<=38.76875), "Out-of-season", status)) %>% 
   # Recode status
   mutate(status=recode(status,
                        "30-fathom depth constraint"="30-fathom depth restriction",
-                       "40-fathom depth constraint"="40-fathom depth restriction")) %>%
+                       "40-fathom depth constraint"="40-fathom depth restriction",
+                       "Whale/domoic acid closure"="Whale entanglement/domoic acid delay")) %>%
   # Fix a mistake spotted by Christy
   mutate(status=ifelse(lat_dd>=(41+8/60) & date>="2018-12-01" & date < "2019-01-25", "Body condition/domoic acid delay", status))
          # status=ifelse(lat_dd>=(41+8/60) & date>="2019-01-15" & date <= "2019-01-25", "Domoic acid delay", status))
@@ -55,7 +56,7 @@ data_or <- data_or_orig %>%
   filter(lat_dd>42.00000 & lat_dd<46.25000 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status)) %>% 
-  mutate(status=ifelse(date>"2024-08-14","out-of-season", status)) %>% 
+  mutate(status=ifelse(date>"2025-08-14","out-of-season", status)) %>% 
   # Recode status
   mutate(status=recode(status,
                        "body condition"="Body condition delay",
@@ -77,13 +78,19 @@ data_wa <- data_wa_orig %>%
   filter(lat_dd >= 46.25000 & date>= "2015-01-01") %>%
   # Fix last season status
   mutate(status=as.character(status)) %>% 
-  mutate(status=ifelse(date>"2024-09-15","Out-of-season", status))
+  mutate(status=ifelse(date>"2025-09-15","Out-of-season", status))
 
 sort(unique(data_wa$status))
 
 
 # Merge data
-data <- bind_rows(data_ca, data_or, data_wa) %>%
+data <- bind_rows(data_ca, data_or, data_wa) 
+
+# Status
+sort(unique(data$status))
+
+# Order data
+data_ordered <- data %>%
   # Factor
   mutate(status=factor(status,
                        levels=c("Season open",
@@ -94,18 +101,25 @@ data <- bind_rows(data_ca, data_or, data_wa) %>%
                                 "Evisceration order",
                                 "Evisceration order (+depth restriction/gear reduction)",
                                 "Whale entanglement closure",
+                                "Whale entanglement/domoic acid delay",
                                 "30-fathom depth restriction",
                                 "40-fathom depth restriction",
-                                "40-fathom depth restriction/20% gear reduction",
+                                "25% gear reduction",
                                 "33% gear reduction",
-                                "50% gear reduction")))
+                                "50% gear reduction",
+                                "30-fathom depth constraint/25% gear reduction",        
+                                "30-fathom depth constraint/50% gear reduction",
+                                "40-fathom depth restriction/20% gear reduction")))
+
+# Makre sure all status levels are complete
+freeR::complete(data_ordered)
 
 # Export
-saveRDS(data, file=file.path(outdir, "2015_2023_WC_dcrab_closures.Rds"))
+saveRDS(data_ordered, file=file.path(outdir, "2015_2024_WC_dcrab_closures.Rds"))
 
 
 # Plot data
-ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
+ggplot(data_ordered, aes(x=date, y=lat_dd, fill=status)) +
   # Plot raster
   geom_raster() +
   # Axis
@@ -115,15 +129,25 @@ ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
   labs(x="Date", y="Latitude (°N)") +
   # Legends
   scale_fill_manual(name="Season status", 
-                    values=c("grey80", "white", "coral", "darkorange", "darkred", "pink", "purple4", 
-                             "navy", "dodgerblue3", "dodgerblue2", "dodgerblue1", "dodgerblue", "lightblue"), 
+                    values=c("grey80", # Season open
+                             "white", # Out-of-season
+                             "coral", # Body condition delay
+                             "darkorange", # Body condition/domoic acid delay
+                             "darkred", # Domoic acid delay
+                             "pink", # Evisceration order
+                             "purple4", # Evisceration order (+depth restriction/gear reduction)
+                             "navy", # Whale entanglement closure
+                             "purple", # Whale entanglement/domoic acid delay
+                             "dodgerblue4", # 30-fathom depth restriction
+                             "dodgerblue3", # 40-fathom depth restriction
+                             "dodgerblue2", # 25% gear reduction
+                             "dodgerblue1", # 33% gear reduction
+                             "lightblue", # 50% gear reduction
+                             "green", # 30-fathom depth constraint/25% gear reduction
+                             "green2", # 30-fathom depth constraint/50% gear reduction
+                             "green3"), # 40-fathom depth restriction/20% gear reduction 
                     drop=F) +
   # Theme
   theme_bw()
-
-
-
-
-
 
 

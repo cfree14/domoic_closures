@@ -15,13 +15,16 @@ indir <- "data/raw"
 outdir <- "data/processed"
 plotdir <- "figures"
 
-# CA base url
-# API concsole: https://console.cloud.google.com/apis/dashboard?project=science-1559925307573
-googlesheets4::gs4_auth_configure(api_key = "AIzaSyAkSi-9GYG-K3XBNqKPSdoZzmtdDL-MMz8")
-base_url <- "https://docs.google.com/spreadsheets/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit?gid=1969542539#gid=1969542539"
+# # CA base url
+# # API concsole: https://console.cloud.google.com/apis/dashboard?project=science-1559925307573
+# googlesheets4::gs4_auth_configure(api_key = "AIzaSyAkSi-9GYG-K3XBNqKPSdoZzmtdDL-MMz8")
+# base_url <- "https://docs.google.com/spreadsheets/d/1nHfQexwdpDZBZinkCCA1C6rZCkb0sPW8ILq83j2DMxQ/edit?gid=1969542539#gid=1969542539"
+# 
+# # Read data
+# data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="CDFW closures", na="NA")
 
 # Read data
-data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="CDFW closures", na="NA")
+data_orig <- readxl::read_excel(file.path(indir, "CA fishery closures.xlsx"), sheet="CDFW closures", na="NA")
 
 
 # Format data
@@ -47,10 +50,16 @@ data1 <- data_orig %>%
 
 # Inspect data
 str(data1)
+freeR::complete(data1)
+
+# Dates
 range(data1$date)
+
+# Lats
 range(data1$lat_s, na.rm=T)
 range(data1$lat_n, na.rm=T)
 sum(data1$lat_n <= data1$lat_s, na.rm=T)
+
 table(data1$reason)
 table(data1$action)
 table(data1$fishery)
@@ -100,7 +109,7 @@ events <- data2 %>%
 ################################################################################
 
 # Dungeness commercial season key
-years <- 2014:2023
+years <- 2014:2024
 seasons <- paste(years, years+1-2000, sep="-")
 open_n <- paste0(years, "-12-01") %>% ymd()
 close_n <-  paste0(years+1, "-07-15") %>% ymd()
@@ -121,7 +130,7 @@ dcrab_comm_c <- tibble(comm_name="Dungeness crab",
 dcrab_comm <- bind_rows(dcrab_comm_n, dcrab_comm_c)
 
 # Dungeness recreational season key
-years <- 2014:2023
+years <- 2014:2024
 seasons <- paste(years, years+1-2000, sep="-")
 open <- freeR::first_wday_in_month(day="Saturday", month="November", years=years)
 close_n <-  paste0(years+1, "-07-30") %>% ymd()
@@ -157,7 +166,7 @@ build_closure_grid <- function(data, species, fishery, season_key){
 
   # Build empty grid
   date1 <- ymd("2015-01-01")
-  date2 <- ymd("2024-07-31")
+  date2 <- ymd("2025-07-31") ############# UPDATE THIS EVEYR YEAR!!!
   dates <- seq(date1, date2, by="1 day")
   lat1 <- 32.5
   lat2 <- 42
@@ -215,23 +224,25 @@ build_closure_grid <- function(data, species, fishery, season_key){
 
   # Make factor
   closure_grid <- closure_grid %>%
-    mutate(status=recode_factor(status,
-                                "open"="Season open",
-                                "out-of-season"="Out-of-season",
-                                "Body condition"="Body condition delay",
-                                "Domoic acid"="Domoic acid delay",
-                                "Whale entanglement/domoic acid"="Whale/domoic acid closure",
-                                "Whale entanglement"="Whale entanglement closure",
-                                "30-fathom depth constraint"="30-fathom depth constraint",
-                                "40-fathom depth constraint"="40-fathom depth constraint",
-                                "25% gear reduction"="25% gear reduction",
-                                "50% gear reduction"="50% gear reduction")) %>%
+    mutate(status=recode(status,
+                        "open"="Season open",
+                        "out-of-season"="Out-of-season",
+                        "Body condition"="Body condition delay",
+                        "Domoic acid"="Domoic acid delay",
+                        "Whale entanglement/domoic acid"="Whale/domoic acid closure",
+                        "Whale entanglement"="Whale entanglement closure",
+                        "30-fathom depth constraint"="30-fathom depth constraint",
+                        "40-fathom depth constraint"="40-fathom depth constraint",
+                        "25% gear reduction"="25% gear reduction",
+                        "50% gear reduction"="50% gear reduction")) %>%
     mutate(status=factor(status, levels=c("Season open",
                                           "Out-of-season",
                                           "Body condition delay",
                                           "Domoic acid delay",
                                           "Whale/domoic acid closure",
                                           "Whale entanglement closure",
+                                          "30-fathom depth constraint/25% gear reduction",
+                                          "30-fathom depth constraint/50% gear reduction",
                                           "30-fathom depth constraint",
                                           "40-fathom depth constraint",
                                           "25% gear reduction",
@@ -278,18 +289,37 @@ plot_closures <- function(data){
   g <- ggplot(data, aes(x=date, y=lat_dd, fill=status)) +
     # Plot raster
     geom_raster() +
+    # Lines
+    geom_hline(yintercept = c(42,
+                              40+10/60,
+                              38+46.125/60,
+                              37+11/60,
+                              36,
+                              34+27/60,
+                              32+32/60)) +
     # Axis
     scale_x_date(date_breaks="1 year", date_labels = "%Y") +
     scale_y_continuous(breaks=32:42) +
     # Labels
     labs(x="", y="Latitude (°N)", title=title) +
     # Legends
-    scale_fill_manual(name="Season status", values=c("grey80", "white", "pink", "darkred", "purple3",
-                                                     "navy", "dodgerblue3", "dodgerblue2", "dodgerblue", "lightblue"), drop=F) +
+    scale_fill_manual(name="Season status", values=c("grey80", # Season open
+                                                     "white", # Out-of-season
+                                                     "pink", # Body condition delay
+                                                     "darkred", # Domoic acid delay
+                                                     "purple3",# Whale/domoic acid closure
+                                                     "navy", # Whale entanglement closure
+                                                     "dodgerblue4", # 30-fathom depth constraint/50% gear reduction
+                                                     "blue", # 30-fathom depth constraint/25% gear reduction
+                                                     "dodgerblue3", # 30-fathom depth constraint
+                                                     "dodgerblue2", # 40-fathom depth constraint
+                                                     "dodgerblue", # 25% gear reduction
+                                                     "lightblue"), # 50% gear reduction
+                      drop=F) +
     # Theme
     theme_bw() + my_theme
   print(g)
-
+  
   # Export plot
   outfig <- paste0(tolower(species) %>% gsub(" ", "_", .), "_",
                    tolower(fishery), "_closures_ca.png")
@@ -305,7 +335,9 @@ plot_closures <- function(data){
 # Apply individually
 closures_dcrabs_comm <- build_closure_grid(data=data3, species="Dungeness crab", fishery="Commercial", season_key=dcrab_seasons)
 plot_closures(closures_dcrabs_comm)
-saveRDS(closures_dcrabs_comm , file=file.path(outdir, "CDFW_2015_2023_comm_dcrab_closures.Rds"))
+
+# Export
+saveRDS(closures_dcrabs_comm , file=file.path(outdir, "CDFW_2015_2024_comm_dcrab_closures.Rds"))
 
 
 # Merge and export

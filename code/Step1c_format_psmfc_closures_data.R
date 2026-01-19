@@ -15,12 +15,15 @@ indir <- "data/raw"
 outdir <- "data/processed"
 plotdir <- "data/closures/figures"
 
-# OR-WA base url
-googlesheets4::gs4_auth_configure(api_key = "")
-base_url <- "https://docs.google.com/spreadsheets/d/1wz18kDz6u19GbGoZrW_q8Dz-kZq16IKF33DZb5Sd4-w/edit#gid=0"
+# # OR-WA base url
+# googlesheets4::gs4_auth_configure(api_key = "")
+# base_url <- "https://docs.google.com/spreadsheets/d/1wz18kDz6u19GbGoZrW_q8Dz-kZq16IKF33DZb5Sd4-w/edit#gid=0"
+# 
+# # Read data
+# data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="PSMFC_DungCrab")
 
-# Read data
-data_orig <- googlesheets4::read_sheet(ss=base_url, sheet="PSMFC_DungCrab")
+# Read data (if Google Sheets not working)
+data_orig <- readxl::read_excel(file.path(indir, "OR-WA fisheries closures.xlsx"), sheet="PSMFC_DungCrab")
 
 # Read commercial Dungeness crab season key
 season_key_orig <- readxl::read_excel(file.path(indir, "season_key.xlsx"))
@@ -99,7 +102,7 @@ events <- data2 %>%
 
 # Step 4. Expand season grid to match date range
 range(data3$date, na.rm=T)
-seasons <- 2004:2023
+seasons <- 2004:2024
 season_key_expanded <- purrr::map_df(seasons, function(x){
 
   # Build open/close date for season
@@ -291,6 +294,6 @@ wa_dcrabs_comm <- build_closure_grid(data=data3, species="Dungeness crab", fishe
 plot_closures(wa_dcrabs_comm)
 
 # Export
-saveRDS(wa_dcrabs_comm, file=file.path(outdir, "PSMFC_2005_2023_comm_dcrab_closures.Rds"))
+saveRDS(wa_dcrabs_comm, file=file.path(outdir, "PSMFC_2005_2024_comm_dcrab_closures.Rds"))
 
 
